@@ -3,7 +3,7 @@ import styles from "../../styles/ProductList.module.css";
 import useSWR from "swr";
 import { fetcher } from "../../utils/fetch";
 import { useState } from "react";
-import { ProductDetails } from "./ProductDetails";
+import ProductDetails  from "./ProductDetails";
 
 const ProductList = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -21,7 +21,7 @@ const ProductList = () => {
 	// },[])
 
 	if (isLoading) {
-		return <p>Trwa łądowanie</p>;
+		return <p>Trwa ładowanie</p>;
 	}
 	if (error) {
 		return <p>Wystąpił błąd</p>;

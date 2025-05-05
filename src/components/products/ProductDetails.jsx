@@ -1,4 +1,4 @@
-export const ProductDetails = ({ selectedProduct }) => {
+const ProductDetails = ({ selectedProduct }) => {
 	if (!selectedProduct) {
 		return <p>Wybierz produkt, żeby wyświetlić szczegóły</p>;
 	}
@@ -15,3 +15,5 @@ export const ProductDetails = ({ selectedProduct }) => {
 		</>
 	);
 };
+
+export default ProductDetails;
