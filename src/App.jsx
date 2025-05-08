@@ -1,47 +1,43 @@
-import { useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+
+import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
 import "./App.css";
 import HomePage from "./routes/Home";
 import LoginPage from "./routes/Login";
 import RegisterPage from "./routes/Register";
 import ProductsPage from "./routes/Products";
 import ProductDetailsPage from "./routes/ProductDetails";
-import useAuth from "./hooks/useAuth";
 import MainLayout from "./layouts/mainLayout";
-
-const mockUser = {
-  name: "John Doe",
-};
+import ProtectedRoute from "./components/ProtectedRoute";
+import Cart from "./routes/Cart";
 
 function App() {
-  const [count, setCount] = useState(0);
-  const { user, loading } = useAuth();
-  const LoginNavigation = () => {
-    return <Navigate to="/login" replace />;
-  };
-
-  if (loading) {
-    return null; // albo <div>Ładowanie...</div>
-  }
-
   return (
-    // <div style={{ display: "flex", flexDirection: "column" }}>
-    //   Header user={mockUser} />
-    //   <ProductList />
-    //   <LoginForm />
-    //   <RegisterForm />
-    //   <ProductForm />
-    // </div>
     <Routes>
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route
           path="/products"
-          element={user ? <ProductsPage /> : <LoginNavigation />}
+          element={
+            <ProtectedRoute>
+              <ProductsPage />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/products/:id"
-          element={user ? <ProductDetailsPage /> : <LoginNavigation />}
+          element={
+            <ProtectedRoute>
+              <ProductDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
         />
       </Route>
       <Route path="/login" element={<LoginPage />} />

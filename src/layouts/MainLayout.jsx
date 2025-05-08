@@ -1,8 +1,17 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import useCart from "../hooks/useCart";
+import Cart from "../routes/Cart"
 
 const MainLayout = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { cartItems, cartSum } = useCart();
+
+  const handleLogout = () => {
+    logout(); // wyloguj użytkownika
+    navigate("/"); // przenieś na stronę główną
+  };
 
   return (
     <>
@@ -17,6 +26,15 @@ const MainLayout = () => {
               <NavLink to="/products" className="hover:underline">
                 Produkty
               </NavLink>
+              <NavLink to="/cart" className="hover:underline">
+                Koszyk ({cartItems.length} / cena całkowita: {cartSum} zł)
+              </NavLink>
+              <button
+                onClick={handleLogout}
+                className="ml-4 bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+              >
+                Wyloguj
+              </button>
             </>
           ) : (
             <>

@@ -3,6 +3,8 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import useAuth from "../../hooks/useAuth";
 
 const yupSchema = yup.object().shape({
   username: yup
@@ -39,6 +41,14 @@ export default function RegisterForm() {
   });
 
   const navigate = useNavigate();
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/products");
+    }
+  }, [user]);
 
   const onSubmit = async (data) => {
     console.log("Dane formularza:", data);

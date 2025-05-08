@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 const yupSchema = yup.object().shape({
   username: yup.string().required("Pole username jest wymagane"),
@@ -24,11 +25,12 @@ export default function LoginForm({ fromRegister = false }) {
   });
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const onSubmit = async (data) => {
-    console.log("Dane formularza:", data);
+    // console.log("Dane formularza:", data);
     setApiError(null);
-    setSuccess(false);
+    setSuccess(null);
     setIsFormSubmitting(true);
     // Logika logowania
     try {
@@ -36,21 +38,24 @@ export default function LoginForm({ fromRegister = false }) {
         "https://fakestoreapi.com/auth/login",
         data
       );
-      console.log(response);
-      if (response.data) {
+      // console.log(response);
+      if (response.data.token) {
+        login(response.data.token, response.data);
         setSuccess(true);
         reset();
-        localStorage.setItem("authToken", response.data.token);
-        window.location.reload(); // 🔁 odśwież stronę = useAuth wykryje token
+        navigate("/products", {
+          state: { fromLogin: true },
+        });
       }
       setIsFormSubmitting(false);
     } catch (e) {
-      if (e.status === 401) {
+      if (e.respose?.status === 401) {
         setApiError(
           "Dane logowania są niepoprawne lub użytkownik nie istnieje"
         );
       } else {
         setApiError("Wystąpił nieznany błąd");
+        console.log("Błąd logowania:", e);
       }
       setIsFormSubmitting(false);
     }
