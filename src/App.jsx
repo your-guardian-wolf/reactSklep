@@ -4,23 +4,27 @@ import "./App.css";
 import HomePage from "./routes/Home";
 import LoginPage from "./routes/Login";
 import RegisterPage from "./routes/Register";
-import ProductsPage from "./routes/Products";
 import ProductDetailsPage from "./routes/ProductDetails";
 import MainLayout from "./layouts/mainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Cart from "./routes/Cart";
+import {lazy, Suspense } from 'react';
 
 function App() {
+
+  const ProductsPage = lazy(() => import('./routes/Products'));
   return (
+
     <Routes>
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route
           path="/products"
           element={
+           
             <ProtectedRoute>
-              <ProductsPage />
-            </ProtectedRoute>
+               <Suspense fallback={<div>Ładowanie...</div>}><ProductsPage />
+               </Suspense></ProtectedRoute>
           }
         />
         <Route

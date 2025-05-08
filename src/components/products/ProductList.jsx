@@ -1,17 +1,35 @@
 import ProductCard from "./ProductCard";
 import styles from "../../styles/ProductList.module.css";
 import { useState, useMemo } from "react";
-import ProductDetails from "./ProductDetails";
 import useProducts from "../../hooks/useProducts";
+import useDebounce from "../../hooks/useDebounce"
 
 const ProductList = () => {
 	const [sortState, setSortState] = useState("none");
-	const { data, error, isLoading } = useProducts ();
+	const { data, error, isLoading } = useProducts();
+	const [priceMin, setPriceMin] = useState("0");
+	const [priceMax, setPriceMax] = useState(null);
+	const [searchTerm, setSearchTerm] = useState("");
+	const debouncedSearchTerm = useDebounce(searchTerm);
+	const [selectedCategory, setSelectedCategory] = useState("all");
 
-	const sortedProducts = useMemo(() => {
+	const filteredAndSortedProducts = useMemo(() => {
 		if (!data) return [];
 
-		const listCopy = [...data];
+		const filteredProducts = data.filter((product) => {
+			return (
+				(product.price >= priceMin || !priceMin) &&
+				(product.price <= priceMax || !priceMax) &&
+				(selectedCategory === "all" || product.category === selectedCategory) &&
+				(!searchTerm ||
+					product?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					product?.description
+						?.toLowerCase()
+						.includes(searchTerm.toLowerCase()))
+			);
+		});
+
+		const listCopy = [...filteredProducts];
 
 		switch (sortState) {
 			case "price_asc":
@@ -21,7 +39,23 @@ const ProductList = () => {
 			default:
 				return listCopy;
 		}
-	}, [data, sortState]);
+	}, [data, sortState, priceMin, priceMax, selectedCategory, searchTerm]);
+
+	const categoryOptions = useMemo(() => {
+		if (!data) return [];
+
+		const uniqueCategories = [];
+
+		for (const product of data) {
+			if (!uniqueCategories.includes(product.category)) {
+				uniqueCategories.push(product.category);
+			}
+		}
+
+		return ["all", ...uniqueCategories];
+	}, [data]);
+
+	console.log(categoryOptions);
 
 	if (isLoading) {
 		return <p>Trwa ładowanie</p>;
@@ -44,8 +78,53 @@ const ProductList = () => {
 				<option value="price_desc">malejąco</option>
 			</select>
 
+			<input
+				type="text"
+				placeholder="Szukaj produktu..."
+				value={searchTerm}
+				onChange={(e) => setSearchTerm(e.target.value)}
+				className="p-2 border rounded-md"
+			/>
+
+			<select
+				value={selectedCategory}
+				onChange={(e) => {
+					setSelectedCategory(e.target.value);
+				}}
+				className="mb-4 p-2 border rounded"
+			>
+				{categoryOptions.map((category) => (
+					<option key={category} value={category}>
+						{category === "all" ? "Wszystkie kategorie" : category}
+					</option>
+				))}
+			</select>
+
+			<div className="flex">
+				<label className="flex flex-col items-center" min-width="200px">
+					Cena od:
+				</label>
+				<input
+					type="number"
+					min="0"
+					value={priceMin}
+					onChange={(e) => setPriceMin(e.target.value)}
+					className="p-2 border rounded-md w-full"
+				></input>
+			</div>
+			<div className="flex">
+				<label className="flex flex-col items-center">Cena do:</label>
+				<input
+					type="number"
+					min="0"
+					value={priceMax}
+					onChange={(e) => setPriceMax(e.target.value)}
+					className="p-2 border rounded-md w-full"
+				></input>
+			</div>
+
 			<div className={styles.container}>
-				{sortedProducts?.map((product) => (
+				{filteredAndSortedProducts?.map((product) => (
 					<ProductCard
 						key={product.id}
 						product={product}
